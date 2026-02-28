@@ -10,6 +10,8 @@
         body { font-family: 'Share Tech Mono', monospace; background-color: #020408; color: #94a3b8; }
         .glow-text { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
         .node-active { border-color: #4f46e5 !important; background-color: rgba(79, 70, 229, 0.3) !important; color: white !important; box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
+        .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.7); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
+        .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.7); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
         
         #mobile-ui { display: none; }
         @media (max-width: 768px) {
@@ -43,71 +45,5 @@
             </div>
 
             <div class="col-span-3 space-y-6">
-                <aside class="border border-slate-800 bg-slate-950/40 rounded-2xl p-4 h-96 flex flex-col">
-                    <div class="text-[10px] font-bold uppercase border-b border-slate-800 pb-2 mb-2 text-indigo-400">Gateway Monitor</div>
-                    <div id="pc-log" class="flex-grow font-mono text-[9px] overflow-y-auto text-slate-500 space-y-1">
-                        <p class="text-green-500">>> CORE_SYSTEM: LISTENING FOR REMOTE SIGNAL...</p>
-                    </div>
-                </aside>
-            </div>
-        </main>
-    </div>
-
-    <div id="mobile-ui" class="fixed inset-0 bg-slate-950 flex-col items-center justify-center p-6">
-        <div class="w-full max-w-xs p-6 border border-indigo-500/30 rounded-3xl text-center mb-10">
-            <h2 class="text-indigo-400 font-bold tracking-[0.5em] text-xs">SIGNAL TRANSMITTER</h2>
-        </div>
-        <button onclick="sendTunnelSignal()" class="w-full py-16 bg-indigo-600 text-white font-black text-2xl rounded-[40px] shadow-[0_0_50px_rgba(79,70,229,0.4)] active:scale-95 transition-all">
-            IGNITE
-        </button>
-    </div>
-
-    <script>
-        const container = document.getElementById('grid-container');
-        const rows = ['A','B','C','D','E','F','G','H'];
-        const nodes = [];
-        rows.forEach(r => {
-            for(let c=1; c<=8; c++) {
-                const b = document.createElement('div');
-                const id = r + c;
-                b.id = 'node-' + id;
-                b.className = 'h-10 border border-slate-900 bg-slate-950 text-slate-800 text-[10px] rounded flex items-center justify-center transition-all duration-300';
-                b.textContent = id;
-                container.appendChild(b);
-                nodes.push(id);
-            }
-        });
-
-        function sendTunnelSignal() {
-            // この関数がPC側のブラウザインスタンスで実行された際の挙動
-            if(window.innerWidth > 768) {
-                const status = document.getElementById('tunnel-status');
-                const log = document.getElementById('pc-log');
-                status.textContent = 'TUNNEL: ONLINE';
-                status.className = 'bg-green-900/20 text-green-400 border border-green-800/50 px-2 py-1 rounded font-bold';
-                
-                let i = 0;
-                const seq = setInterval(() => {
-                    if(i < nodes.length) {
-                        document.getElementById('node-' + nodes[i]).classList.add('node-active');
-                        const p = document.createElement('p');
-                        p.className = 'text-indigo-500';
-                        p.textContent = `>> NODE_${nodes[i]}: SYNCED`;
-                        log.appendChild(p);
-                        log.scrollTop = log.scrollHeight;
-                        i++;
-                    } else {
-                        clearInterval(seq);
-                        const p = document.createElement('p');
-                        p.className = 'text-white glow-text mt-2';
-                        p.textContent = `>> CORE TUNNELING COMPLETE.`;
-                        log.appendChild(p);
-                    }
-                }, 20);
-            } else {
-                alert("SIGNAL TRANSMITTED.");
-            }
-        }
-    </script>
-</body>
-</html>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="igniteTunnel()" class="py-4 bg-green-950/30 border border-green-500/50 text-green-500 text-
