@@ -2,101 +2,131 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>TORUS GENESIS CORE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TG-CORE TUNNELING</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        body { 
-            font-family: 'Share Tech Mono', monospace; 
-            background-color: #020408; 
-            color: #94a3b8; 
-            min-width: 1200px; /* 画面が縮んでもレイアウトを崩さない */
-            overflow-x: auto;
-        }
-        .glow-text { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
+        body { font-family: 'Share Tech Mono', monospace; background-color: #020408; color: #94a3b8; overflow: hidden; }
+        .glow-pink { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
         .node-active { border-color: #4f46e5 !important; background-color: rgba(79, 70, 229, 0.3) !important; color: white !important; box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
-        .panel-bg { background: rgba(15, 23, 42, 0.4); border: 1px solid #1e293b; }
+        
+        /* デバイスによる役割の完全な切り分け */
+        #mobile-trigger { display: none; }
+        @media (max-width: 768px) {
+            #pc-monitor { display: none; }
+            #mobile-trigger { display: flex !important; }
+        }
     </style>
 </head>
-<body class="p-8">
+<body>
 
-    <div class="max-w-[1600px] mx-auto">
-        <header class="flex justify-between items-center mb-8 border-b border-slate-900 pb-4">
-            <h1 class="text-3xl font-black italic text-pink-600 glow-text tracking-tighter">TORUS <span class="text-white">GENESIS</span> <span class="text-indigo-500 text-sm tracking-widest ml-1">CORE</span></h1>
-            <div id="tunnel-status" class="bg-blue-900/20 text-blue-400 border border-blue-800/50 px-3 py-1 rounded text-[10px] font-bold">TUNNEL: LISTENING</div>
+    <div id="pc-monitor" class="p-8 h-screen flex flex-col max-w-[1600px] mx-auto">
+        <header class="flex justify-between items-center border-b border-slate-900 pb-4">
+            <h1 class="text-3xl font-black italic text-pink-600 glow-pink">TORUS <span class="text-white">GENESIS</span> <span class="text-indigo-500 text-sm tracking-widest ml-1">CORE</span></h1>
+            <div id="status-tag" class="bg-blue-900/20 text-blue-400 border border-blue-800/50 px-3 py-1 rounded text-[10px]">WAITING FOR EXTERNAL SIGNAL...</div>
         </header>
 
-        <div class="grid grid-cols-12 gap-6">
+        <main class="grid grid-cols-12 gap-6 mt-8 flex-grow">
             <div class="col-span-9 space-y-6">
-                <section class="panel-bg p-6 rounded-2xl">
-                    <div class="text-[10px] text-slate-500 uppercase tracking-[0.4em] mb-4">Torus Core Pipeline</div>
+                <section class="border border-slate-800 bg-slate-950/40 p-6 rounded-2xl">
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="h-28 border border-slate-800/50 rounded-xl bg-black/60 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Link_A</div>
-                        <div class="h-28 border border-slate-800/50 rounded-xl bg-black/60 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Link_B</div>
-                        <div class="h-28 border border-slate-800/50 rounded-xl bg-black/60 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Buffer_1</div>
-                        <div class="h-28 border border-slate-800/50 rounded-xl bg-black/60 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Buffer_2</div>
+                        <div class="h-24 border border-slate-800/30 rounded-xl bg-black/40 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Link_A</div>
+                        <div class="h-24 border border-slate-800/30 rounded-xl bg-black/40 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Link_B</div>
+                        <div class="h-24 border border-slate-800/30 rounded-xl bg-black/40 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Buffer_1</div>
+                        <div class="h-24 border border-slate-800/30 rounded-xl bg-black/40 flex items-center justify-center text-[10px] text-slate-700 uppercase italic">Buffer_2</div>
                     </div>
                 </section>
                 <section id="grid-container" class="grid grid-cols-8 gap-2"></section>
             </div>
-
-            <div class="col-span-3 space-y-4">
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="executeTunneling()" class="py-4 bg-green-950/30 border border-green-500/50 text-green-500 text-[10px] font-bold rounded-xl hover:bg-green-600 hover:text-white transition-all">START SYSTEM</button>
-                    <button onclick="location.reload()" class="py-4 bg-red-950/30 border border-red-500/50 text-red-500 text-[10px] font-bold rounded-xl hover:bg-red-600 hover:text-white transition-all">RESET CORE</button>
-                </div>
-                
-                <aside class="panel-bg rounded-2xl p-4 h-[500px] flex flex-col">
+            <div class="col-span-3">
+                <aside class="border border-slate-800 bg-slate-950/40 rounded-2xl p-4 h-[500px] flex flex-col">
                     <div class="text-[10px] font-bold uppercase border-b border-slate-800 pb-2 mb-2 text-indigo-400">Gateway Monitor</div>
                     <div id="pc-log" class="flex-grow font-mono text-[9px] overflow-y-auto text-slate-500 space-y-1">
-                        <p class="text-green-500">>> CORE_SYSTEM_v1.0: ONLINE.</p>
-                        <p class="text-slate-600">>> READY FOR OPERATOR COMMAND...</p>
+                        <p class="text-green-500">>> LISTENING ON PORT:443...</p>
                     </div>
                 </aside>
             </div>
+        </main>
+    </div>
+
+    <div id="mobile-trigger" class="fixed inset-0 bg-slate-950 flex-col items-center justify-center p-8">
+        <div class="w-full border border-indigo-500/20 p-6 rounded-3xl text-center mb-12">
+            <h2 class="text-indigo-400 font-bold tracking-[0.6em] text-xs">TUNNEL TERMINAL</h2>
+            <p class="text-[8px] text-slate-600 mt-2">LINK_ID: REMOTE_GENESIS_01</p>
         </div>
+        
+        <button onclick="igniteTunnel()" class="w-full py-20 bg-indigo-600 text-white font-black text-3xl rounded-[50px] shadow-[0_0_60px_rgba(79,70,229,0.5)] active:scale-95 transition-all">
+            IGNITE
+        </button>
+        
+        <p class="mt-12 text-[9px] text-slate-700 uppercase tracking-widest italic">Encrypted Tunneling Protocol</p>
     </div>
 
     <script>
         const container = document.getElementById('grid-container');
-        const nodes = [];
         const rows = ['A','B','C','D','E','F','G','H'];
+        const nodes = [];
         rows.forEach(r => {
             for(let c=1; c<=8; c++) {
                 const b = document.createElement('div');
                 const id = r + c; b.id = 'node-' + id;
-                b.className = 'h-12 border border-slate-900 bg-slate-950/80 text-slate-800 text-[10px] rounded flex items-center justify-center transition-all duration-200';
+                b.className = 'h-11 border border-slate-900 bg-slate-950 text-slate-800 text-[10px] rounded flex items-center justify-center transition-all duration-300';
                 b.textContent = id;
                 container.appendChild(b);
                 nodes.push(id);
             }
         });
 
-        function executeTunneling() {
-            const status = document.getElementById('tunnel-status');
+        // 共通の起動シーケンス
+        function runSequence() {
+            const status = document.getElementById('status-tag');
             const log = document.getElementById('pc-log');
-            
+            if(!status) return;
+
             status.textContent = 'TUNNEL: ONLINE';
-            status.className = 'bg-green-900/20 text-green-400 border border-green-800/50 px-3 py-1 rounded text-[10px] font-bold';
+            status.className = 'bg-green-900/20 text-green-400 border border-green-800/50 px-3 py-1 rounded text-[10px] font-bold animate-pulse';
             
             let i = 0;
             const seq = setInterval(() => {
                 if(i < nodes.length) {
-                    document.getElementById('node-' + nodes[i]).classList.add('node-active');
+                    const node = document.getElementById('node-' + nodes[i]);
+                    if(node) node.classList.add('node-active');
                     const p = document.createElement('p');
                     p.className = 'text-indigo-500';
-                    p.textContent = `>> SYNCING_NODE_${nodes[i]}... OK`;
+                    p.textContent = `>> TUNNEL_PULSE_${nodes[i]}: OK`;
                     log.appendChild(p);
                     log.scrollTop = log.scrollHeight;
                     i++;
                 } else {
                     clearInterval(seq);
                     const p = document.createElement('p');
-                    p.className = 'text-white glow-text mt-2 font-bold';
-                    p.textContent = `>> TUNNEL ESTABLISHED. CORE FULL SYNC.`;
+                    p.className = 'text-white glow-pink mt-2 font-bold';
+                    p.textContent = `>> TUNNEL PENETRATION COMPLETE.`;
                     log.appendChild(p);
                 }
             }, 15);
+        }
+
+        // スマホで押した時の処理
+        function igniteTunnel() {
+            if(window.innerWidth <= 768) {
+                // 信号を「記録」する（PC側への合図）
+                localStorage.setItem('tg_core_pulse', Date.now());
+                alert("TUNNEL SIGNAL IGNITED.");
+            } else {
+                // PC側で直接押した場合も動くようにしておく
+                runSequence();
+            }
+        }
+
+        // PC側：スマホからの信号を常に監視
+        if (window.innerWidth > 768) {
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'tg_core_pulse') {
+                    runSequence();
+                }
+            });
         }
     </script>
 </body>
