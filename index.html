@@ -11,7 +11,7 @@
         .glow-pink { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
         .node-active { border-color: #4f46e5 !important; background-color: rgba(79, 70, 229, 0.3) !important; color: white !important; box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
         
-        /* デバイスによる役割の完全な切り分け */
+        /* 役割の完全分離 */
         #mobile-trigger { display: none; }
         @media (max-width: 768px) {
             #pc-monitor { display: none; }
@@ -39,7 +39,13 @@
                 </section>
                 <section id="grid-container" class="grid grid-cols-8 gap-2"></section>
             </div>
-            <div class="col-span-3">
+
+            <div class="col-span-3 space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="igniteTunnel()" class="py-3 bg-green-900/20 border border-green-500/50 text-green-500 text-[10px] font-bold rounded-lg hover:bg-green-500 hover:text-white transition-all">START SYSTEM</button>
+                    <button onclick="location.reload()" class="py-3 bg-red-900/20 border border-red-500/50 text-red-500 text-[10px] font-bold rounded-lg hover:bg-red-500 hover:text-white transition-all">RESET CORE</button>
+                </div>
+
                 <aside class="border border-slate-800 bg-slate-950/40 rounded-2xl p-4 h-[500px] flex flex-col">
                     <div class="text-[10px] font-bold uppercase border-b border-slate-800 pb-2 mb-2 text-indigo-400">Gateway Monitor</div>
                     <div id="pc-log" class="flex-grow font-mono text-[9px] overflow-y-auto text-slate-500 space-y-1">
@@ -53,14 +59,10 @@
     <div id="mobile-trigger" class="fixed inset-0 bg-slate-950 flex-col items-center justify-center p-8">
         <div class="w-full border border-indigo-500/20 p-6 rounded-3xl text-center mb-12">
             <h2 class="text-indigo-400 font-bold tracking-[0.6em] text-xs">TUNNEL TERMINAL</h2>
-            <p class="text-[8px] text-slate-600 mt-2">LINK_ID: REMOTE_GENESIS_01</p>
         </div>
-        
         <button onclick="igniteTunnel()" class="w-full py-20 bg-indigo-600 text-white font-black text-3xl rounded-[50px] shadow-[0_0_60px_rgba(79,70,229,0.5)] active:scale-95 transition-all">
             IGNITE
         </button>
-        
-        <p class="mt-12 text-[9px] text-slate-700 uppercase tracking-widest italic">Encrypted Tunneling Protocol</p>
     </div>
 
     <script>
@@ -71,14 +73,13 @@
             for(let c=1; c<=8; c++) {
                 const b = document.createElement('div');
                 const id = r + c; b.id = 'node-' + id;
-                b.className = 'h-11 border border-slate-900 bg-slate-950 text-slate-800 text-[10px] rounded flex items-center justify-center transition-all duration-300';
+                b.className = 'h-11 border border-slate-900 bg-slate-950 text-slate-800 text-[10px] rounded flex items-center justify-center transition-all duration-200';
                 b.textContent = id;
                 container.appendChild(b);
                 nodes.push(id);
             }
         });
 
-        // 共通の起動シーケンス
         function runSequence() {
             const status = document.getElementById('status-tag');
             const log = document.getElementById('pc-log');
@@ -108,24 +109,18 @@
             }, 15);
         }
 
-        // スマホで押した時の処理
         function igniteTunnel() {
             if(window.innerWidth <= 768) {
-                // 信号を「記録」する（PC側への合図）
                 localStorage.setItem('tg_core_pulse', Date.now());
                 alert("TUNNEL SIGNAL IGNITED.");
             } else {
-                // PC側で直接押した場合も動くようにしておく
                 runSequence();
             }
         }
 
-        // PC側：スマホからの信号を常に監視
         if (window.innerWidth > 768) {
             window.addEventListener('storage', (e) => {
-                if (e.key === 'tg_core_pulse') {
-                    runSequence();
-                }
+                if (e.key === 'tg_core_pulse') runSequence();
             });
         }
     </script>
