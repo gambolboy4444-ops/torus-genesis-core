@@ -2,120 +2,102 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TORUS GENESIS CORE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TG-CORE TUNNELING TEST</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         body { font-family: 'Share Tech Mono', monospace; background-color: #020408; color: #94a3b8; overflow: hidden; }
-        .glow-text { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
-        .glow-green { text-shadow: 0 0 10px rgba(34, 197, 94, 0.7); box-shadow: 0 0 15px rgba(34, 197, 94, 0.2); }
-        .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.7); box-shadow: 0 0 15px rgba(239, 68, 68, 0.2); }
-        .tunneling { color: #4f46e5; animation: blink 0.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .glow-pink { text-shadow: 0 0 10px rgba(219, 39, 119, 0.7); }
+        .tunnel-active { color: #4f46e5; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        #mobile-controller { display: none; }
+        @media (max-width: 768px) { #pc-monitor { display: none; } #mobile-controller { display: block; } }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen">
-    <header class="flex flex-wrap justify-between items-center mb-8 border-b border-slate-900 pb-4 gap-4">
-        <div class="flex items-center gap-6">
-            <h1 class="text-3xl font-black italic tracking-tighter text-pink-600 glow-text">TORUS <span class="text-white">GENESIS</span> <span class="text-indigo-500 text-sm tracking-widest ml-1 text-white">CORE</span></h1>
-            <div class="hidden md:flex gap-2 text-[10px]">
-                <span class="bg-blue-900/20 text-blue-400 border border-blue-800/50 px-2 py-1 rounded uppercase">Tunnel: <span id="tunnel-status">Inactive</span></span>
-                <span class="bg-green-900/20 text-green-400 border border-green-800/50 px-2 py-1 rounded animate-pulse">CORE: READY</span>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-xs text-slate-600 border border-slate-800 px-3 py-1 rounded-full bg-black italic">https://torus-genesis-core.vercel.app</span>
-        </div>
-    </header>
+<body>
 
-    <main class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-9 space-y-6">
-            <section class="border border-slate-800 bg-slate-950/40 p-6 rounded-2xl">
-                <div class="flex justify-between items-center mb-6 text-[10px] tracking-[0.4em] font-bold text-slate-500 uppercase">
-                    Torus Core Pipeline
-                    <div id="sync-bar" class="w-48 h-1 bg-slate-900 rounded-full overflow-hidden"><div id="progress" class="w-0 h-full bg-indigo-500 transition-all duration-1000"></div></div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="h-28 border border-slate-800/50 rounded-xl bg-black/40 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-slate-700 uppercase">Link_A</span>
-                    </div>
-                    <div class="h-28 border border-slate-800/50 rounded-xl bg-black/40 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-slate-700 uppercase">Link_B</span>
-                    </div>
-                    <div class="h-28 border border-slate-800/50 rounded-xl bg-black/40 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-slate-700 uppercase">Buffer_1</span>
-                    </div>
-                    <div class="h-28 border border-slate-800/50 rounded-xl bg-black/40 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-slate-700 uppercase">Buffer_2</span>
-                    </div>
-                </div>
-            </section>
-            <section id="grid-container" class="grid grid-cols-4 md:grid-cols-8 gap-2"></section>
-        </div>
-
-        <div class="col-span-12 lg:col-span-3 space-y-6">
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="startTunnel()" class="py-4 bg-green-950/30 border border-green-500/50 text-green-500 text-[10px] font-bold rounded-xl glow-green hover:bg-green-500 hover:text-white transition-all">START SYSTEM</button>
-                <button onclick="location.reload()" class="py-4 bg-red-950/30 border border-red-500/50 text-red-500 text-[10px] font-bold rounded-xl glow-red hover:bg-red-500 hover:text-white transition-all">RESET CORE</button>
+    <div id="pc-monitor" class="p-8 h-screen flex flex-col">
+        <header class="flex justify-between border-b border-slate-900 pb-4">
+            <h1 class="text-3xl font-black italic text-pink-600 glow-pink">TORUS GENESIS <span class="text-white">CORE</span></h1>
+            <div class="text-[10px] text-right">
+                <p>STATUS: <span id="pc-status" class="text-slate-500">LISTENING...</span></p>
+                <p class="text-indigo-500">ADDR: 127.0.0.1::TUNNEL</p>
             </div>
-            <aside class="border border-slate-800 bg-slate-950/40 rounded-2xl p-4 h-80 flex flex-col">
-                <div class="text-[10px] font-bold uppercase border-b border-slate-800 pb-2 mb-2 text-indigo-400">Gateway Monitor</div>
-                <div id="console" class="flex-grow font-mono text-[9px] overflow-y-auto text-slate-500 space-y-1">
-                    <p class="text-green-500">>> STANDBY. WAITING FOR START COMMAND.</p>
+        </header>
+        <main class="grid grid-cols-12 gap-6 mt-8 flex-grow">
+            <div class="col-span-9 grid grid-cols-8 gap-2" id="node-grid"></div>
+            <div class="col-span-3 bg-black/50 border border-slate-800 p-4 rounded-xl">
+                <div id="pc-console" class="text-[9px] font-mono space-y-1">
+                    <p class="text-green-500">>> CORE SYSTEM READY.</p>
                 </div>
-            </aside>
+            </div>
+        </main>
+    </div>
+
+    <div id="mobile-controller" class="p-6 h-screen flex flex-col bg-slate-950">
+        <div class="border border-indigo-500/30 p-4 rounded-2xl mb-10 text-center">
+            <h2 class="text-indigo-400 font-bold tracking-widest text-sm">TUNNELING TERMINAL</h2>
+            <p id="m-status" class="text-[9px] text-slate-600 mt-2">LINK READY</p>
         </div>
-    </main>
+        <button onclick="executeTunneling()" class="flex-grow bg-indigo-600 text-white font-black rounded-3xl shadow-[0_0_50px_rgba(79,70,229,0.4)] active:scale-95 text-xl tracking-[0.2em]">EXECUTE TUNNEL</button>
+        <p class="text-[8px] text-center mt-6 text-slate-700 uppercase italic">Authorized access only</p>
+    </div>
 
     <script>
-        const consoleEl = document.getElementById('console');
-        const progress = document.getElementById('progress');
-        const tunnelStatus = document.getElementById('tunnel-status');
+        const pcConsole = document.getElementById('pc-console');
+        const pcStatus = document.getElementById('pc-status');
 
-        function addLog(text, color = 'text-slate-500') {
+        // PC側グリッド生成
+        const grid = document.getElementById('node-grid');
+        if(grid) {
+            for(let i=0; i<64; i++) {
+                const n = document.createElement('div');
+                n.id = 'n-' + i;
+                n.className = 'h-12 border border-slate-900 bg-slate-950/50 rounded flex items-center justify-center text-[8px] text-slate-800 transition-all duration-300';
+                n.textContent = 'NODE_' + i;
+                grid.appendChild(n);
+            }
+        }
+
+        function addLog(msg, color='text-slate-500') {
             const p = document.createElement('p');
             p.className = color;
-            p.textContent = `>> ${text}`;
-            consoleEl.appendChild(p);
-            consoleEl.scrollTop = consoleEl.scrollHeight;
+            p.textContent = `>> ${msg}`;
+            pcConsole.appendChild(p);
+            pcConsole.scrollTop = pcConsole.scrollHeight;
         }
 
-        function startTunnel() {
-            addLog('INITIALIZING TUNNEL PROTOCOL...', 'text-indigo-400');
-            tunnelStatus.textContent = 'Connecting...';
-            tunnelStatus.className = 'tunneling';
-            
-            setTimeout(() => {
-                addLog('SEARCHING FOR CORE GATEWAY...', 'text-slate-400');
-                progress.style.width = '40%';
-            }, 1000);
+        // トンネリング実演シーケンス
+        function executeTunneling() {
+            // スマホ側の表示
+            const mStatus = document.getElementById('m-status');
+            mStatus.textContent = 'TRANSMITTING...';
+            mStatus.className = 'tunnel-active text-[9px]';
 
-            setTimeout(() => {
-                addLog('ENCRYPTION HANDSHAKE: SUCCESS', 'text-green-500');
-                addLog('ESTABLISHING P2P TUNNEL...', 'text-indigo-400');
-                progress.style.width = '75%';
-            }, 2500);
-
-            setTimeout(() => {
-                addLog('TUNNEL OPEN: 127.0.0.1 <-> GENESIS_CORE', 'text-white glow-text');
-                addLog('SYSTEM SYNC COMPLETE.', 'text-green-500');
-                progress.style.width = '100%';
-                tunnelStatus.textContent = 'Online';
-                tunnelStatus.className = 'text-green-400 font-bold';
-            }, 4500);
-        }
-
-        const container = document.getElementById('grid-container');
-        const rows = ['A','B','C','D','E','F','G','H'];
-        rows.forEach(r => {
-            for(let c=1; c<=8; c++) {
-                const b = document.createElement('button');
-                b.className = 'h-10 border border-slate-900 bg-slate-950 text-slate-800 text-[10px] rounded hover:border-indigo-500 transition-all';
-                b.textContent = r + c;
-                container.appendChild(b);
+            // 本来はここからPCに信号を飛ばしますが、今は同一URLによる「実演」として
+            // PCで見ている場合に備え、ブラウザ上の動作として同期演出を行います
+            if(window.innerWidth > 768) {
+                pcStatus.textContent = 'TUNNELING...';
+                pcStatus.className = 'tunnel-active';
+                addLog('INCOMING SIGNAL DETECTED', 'text-indigo-400');
+                
+                let i = 0;
+                const interval = setInterval(() => {
+                    if(i < 64) {
+                        const node = document.getElementById('n-'+i);
+                        node.className = 'h-12 border border-indigo-500 bg-indigo-900/40 rounded flex items-center justify-center text-[8px] text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]';
+                        addLog(`SYNCING NODE_${i}...`, 'text-indigo-500');
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                        pcStatus.textContent = 'CONNECTED';
+                        pcStatus.className = 'text-green-500 font-black';
+                        addLog('TUNNEL ESTABLISHED: CORE ACCESS GRANTED', 'text-green-400 font-bold');
+                    }
+                }, 30);
             }
-        });
+        }
     </script>
 </body>
 </html>
